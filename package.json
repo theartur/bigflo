@@ -1,0 +1,32 @@
+{
+  "name": "bigflo",
+  "version": "1.0.0",
+  "description": "Precise Arithmetic for Numbers of Any Size in JavaScript",
+  "main": "BigFlo.js",
+  "scripts": {
+    "test": "node BigFlo.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/theartur/bigflo.git"
+  },
+  "keywords": [
+    "high-precision",
+    "precision",
+    "arithmetic",
+    "decimal",
+    "fractional",
+    "IEEE-754",
+    "financial",
+    "calculation",
+    "scientific",
+    "computation",
+    "exact"
+  ],
+  "author": "jazzcript <jazzcript@hotmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/theartur/bigflo/issues"
+  },
+  "homepage": "https://github.com/theartur/bigflo#readme"
+}
