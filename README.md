@@ -219,7 +219,7 @@ BigFlo(x)['>'](number) // symbolic alias
 ```
 
 ```javascript
-// 'LESS THEN' COMPARISON OPERATOR
+// 'LESS THAN' COMPARISON OPERATOR
 BigFlo(x).isLessThan(number)
 BigFlo(x).lt(number) // short alias
 BigFlo(x)['<'](number) // symbolic alias
