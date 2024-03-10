@@ -6,6 +6,7 @@ BigFlo is a cutting-edge JavaScript library designed for high precision arithmet
 
 - **Unlimited Number Size**: Handle extremely large integers and decimal numbers without limits other than your system's memory.
 - **Fix for IEEE 754**: Overcome the quirks of IEEE 754 for total precision in every digit.
+- **Compatible with JSON**: Supports JSON serialization for easy data handling.
 - **High Precision Arithmetic**: Perform addition, subtraction, multiplication, division, and power operations with absolute accuracy.
 - **Number and Math Methods**: Includes Math and Number utility methods, tailored for large number operations.
 - **Universal Numeric Input**: Accepts numbers in any format, as `String` (recommended for precision), `Number`, `BigInt`, `BigFlo` and even scientific notation.

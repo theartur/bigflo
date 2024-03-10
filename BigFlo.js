@@ -531,6 +531,10 @@
             return print(this.#integer, this.#fractional);
         }
 
+        toJSON() {
+            return this.toString();
+        }
+
         setDivisionPrecision(precision) {
             precision = parseInt(precision);
 
