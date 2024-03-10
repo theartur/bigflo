@@ -1,6 +1,6 @@
 {
   "name": "bigflo",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Precise Arithmetic for Numbers of Any Size in JavaScript",
   "main": "BigFlo.js",
   "scripts": {
