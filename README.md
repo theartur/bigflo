@@ -113,6 +113,23 @@ console.log(`Molecules in 2 moles: ${molecules}`);
 // Molecules in 2 moles: 1204428152000000000000000
 ```
 
+### Example: Calculate the number of Planck volumes in the observable universe
+
+```javascript
+// how many of the smallest thing possible is inside the whole observable universe?
+const PI = '3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679';
+const planckLength = BigFlo('1.616255e-35');
+const planckVolume = planckLength['**'](3);
+const sphereVolume = r => BigFlo(4).setDivisionPrecision(100)['/'](3)['*'](PI)['*'](BigFlo(r)['**'](3));
+const observableUniverseDiameter = BigFlo('8.8e26');
+const observableUniverseRadius = observableUniverseDiameter['/'](2);
+const observableUniverseVolume = sphereVolume(observableUniverseRadius);
+const planckVolumeCountInObservableUniverse = observableUniverseVolume['/'](planckVolume).floor();
+
+console.log(`Number of Planck volumes in the observable universe: ${planckVolumeCountInObservableUniverse}`);
+// Number of Planck volumes in the observable universe: 84511730484834131206881865680639113619647108892011465350695564305272555636684111446309955229141533316023379319781575896906672933616475618801242275287976816735193410571088873930085447368
+```
+
 ### Example: Large decimals
 
 ```javascript
