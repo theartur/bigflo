@@ -88,7 +88,7 @@
     };
     const parsedNumberToBigInt = ({ integer, fractional }) => BigInt(`${integer}${fractional}`);
     const fixTrailingPrecision = (fractional, precision) => fractional.padEnd(precision, '0').slice(0, precision);
-    const print = (integer, fractional) => {
+    const print = ({ integer, fractional }) => {
         if (isIntegerNaN(integer)) return 'NaN';
         if (!isIntegerFinite(integer)) return integer;
         const prettyFractional = removeTrailingZeros(isFractionalRelevant(fractional) ? `.${fractional}` : '');
@@ -460,8 +460,8 @@
             integer: rightInteger,
             fractional: rightFractional
         } = rightOperand;
-        const left = print(leftInteger, leftFractional);
-        const right = print(rightInteger, rightFractional);
+        const left = print({ integer: leftInteger, fractional: leftFractional });
+        const right = print({ integer: rightInteger, fractional: rightFractional });
         return left === right;
     };
     const isGreaterThan = (leftOperand, rightOperand) => {
@@ -483,14 +483,90 @@
     const isDifferent = (leftOperand, rightOperand) => {
         return !isEqual(leftOperand, rightOperand);
     };
-    const isSafeInteger = ({ integer, fractional }) => {
-        return Number.isSafeInteger(Number(print(integer, fractional)));
+    const isSafeInteger = number => {
+        return Number.isSafeInteger(Number(print(number)));
     };
     const toFixed = ({ integer, fractional }, precision = 0) => {
         if (isIntegerNaN(integer)) return 'NaN';
         if (!isIntegerFinite(integer)) return `${integer}`;
         const fixed = fixTrailingPrecision(fractional, precision);
         return `${integer}${fixed ? `.${fixed}` : ''}`;
+    };
+    const abs = number => {
+        const parsedNumber = parse(number);
+        const { integer, fractional } = parsedNumber;
+
+        if (isIntegerNaN(integer)) return parsedNumber;
+        if (!isIntegerFinite(integer)) return parse(Infinity);
+
+        if (isNegative(integer)) {
+            return { integer: integer.slice(1), fractional };
+        }
+
+        return parsedNumber;
+    };
+    const ceil = number => {
+        const parsedNumber = parse(number);
+        const { integer, fractional } = parsedNumber;
+
+        if (isIntegerNaN(integer) || !isIntegerFinite(integer)) return parsedNumber;
+
+        let result = parsedNumber;
+        if (isFractionalRelevant(fractional)) {
+            if (isPositive(integer)) {
+                result = plus(parsedNumber, 1);
+            }
+            result = { integer: result.integer, fractional: '' };
+        }
+
+        return result;
+    };
+    const floor = number => {
+        const parsedNumber = parse(number);
+        const { integer, fractional } = parsedNumber;
+
+        if (isIntegerNaN(integer) || !isIntegerFinite(integer)) return parsedNumber;
+
+        let result = parsedNumber;
+        if (isFractionalRelevant(fractional)) {
+            if (isNegative(integer)) {
+                result = minus(parsedNumber, 1);
+            }
+            result = { integer: result.integer, fractional: '' };
+        }
+
+        return result;
+    };
+    const round = number => {
+        const parsedNumber = parse(number);
+        const { integer, fractional } = parsedNumber;
+
+        if (isIntegerNaN(integer) || !isIntegerFinite(integer)) return parsedNumber;
+
+        const fractionalPart = { integer: (isPositive(integer) ? '0' : '-0'), fractional };
+        let result = parsedNumber;
+
+        if (isPositive(integer) && isGreaterThanOrEqual(fractionalPart, 0.5)) {
+            result = plus(integer, 1);
+        } else if (isLessThanOrEqual(fractionalPart, -0.5)) {
+            result = minus(integer, (isEqual(fractionalPart, -0.5) ? 0 : 1));
+        }
+
+        return { integer: result.integer, fractional: '' };
+    };
+    const sign = number => {
+        const parsedNumber = parse(number);
+        const { integer, fractional } = parsedNumber;
+
+        if (isIntegerNaN(integer)) return parsedNumber;
+
+        if (isEqual(parsedNumber, 0)) {
+            return parse(0);
+        } else if (isNegative(integer)) {
+            return parse(-1);
+        }
+
+        return parse(1);
     };
 
     class BigFlo {
@@ -528,7 +604,7 @@
         }
 
         toString() {
-            return print(this.#integer, this.#fractional);
+            return print(this.#parsed());
         }
 
         toJSON() {
@@ -744,73 +820,28 @@
         }
 
         abs() {
-            if (isIntegerNaN(this.#integer)) return 'NaN';
-            if (!isIntegerFinite(this.#integer)) return 'Infinity';
-
-            if (this.isNegative()) {
-                this.#update(this.#integer.slice(1), this.#fractional);
-            }
-
-            return this;
+            const { integer, fractional } = abs(this.#parsed());
+            return this.#update(integer, fractional);
         }
 
         ceil() {
-            if (isIntegerNaN(this.#integer)) return 'NaN';
-            if (!isIntegerFinite(this.#integer)) return `${this.#integer}`;
-            if (isFractionalRelevant(this.#fractional)) {
-                if (this.isPositive()) {
-                    this.plus(1);
-                }
-                this.#update(this.#integer, '');
-            }
-
-            return this;
+            const { integer, fractional } = ceil(this.#parsed());
+            return this.#update(integer, fractional);
         }
 
         floor() {
-            if (isIntegerNaN(this.#integer)) return 'NaN';
-            if (!isIntegerFinite(this.#integer)) return `${this.#integer}`;
-            if (isFractionalRelevant(this.#fractional)) {
-                if (this.isNegative()) {
-                    this.minus(1);
-                }
-                this.#update(this.#integer, '');
-            }
-
-            return this;
+            const { integer, fractional } = floor(this.#parsed());
+            return this.#update(integer, fractional);
         }
 
         round() {
-            if (isIntegerNaN(this.#integer)) return 'NaN';
-            if (!isIntegerFinite(this.#integer)) return `${this.#integer}`;
-
-            const integerPart = this.#integer;
-            const fractionalPart = { integer: (isPositive(integerPart) ? '0' : '-0'), fractional: this.#fractional };
-            let result = parse(integerPart);
-
-            if (isPositive(integerPart) && isGreaterThanOrEqual(fractionalPart, 0.5)) {
-                result = plus(integerPart, 1);
-            } else if (isLessThanOrEqual(fractionalPart, -0.5)) {
-                result = minus(integerPart, (isEqual(fractionalPart, -0.5) ? 0 : 1));
-            }
-
-            this.#update(result.integer, '');
-
-            return this;
+            const { integer, fractional } = round(this.#parsed());
+            return this.#update(integer, fractional);
         }
 
         sign() {
-            if (isIntegerNaN(this.#integer)) return 'NaN';
-
-            if (isEqual(this.#parsed(), 0)) {
-                this.#update('0', '');
-            } else if (this.isNegative()) {
-                this.#update('-1', '');
-            } else {
-                this.#update('1', '');
-            }
-
-            return this;
+            const { integer, fractional } = sign(this.#parsed());
+            return this.#update(integer, fractional);
         }
 
         trunc() {
